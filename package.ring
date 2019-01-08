@@ -15,8 +15,38 @@ aPackageInfo = [
 	],
 	:libs = 	[
 		[
-			:name = "",
-			:version = "",
+			:name = "ringopenssl",
+			:version = "1.0",
+			:providerusername = ""
+		],
+		[
+			:name = "ringcurl",
+			:version = "1.0",
+			:providerusername = ""
+		],
+		[
+			:name = "internetlib",
+			:version = "1.0",
+			:providerusername = ""
+		],
+		[
+			:name = "ringodbc",
+			:version = "1.0",
+			:providerusername = ""
+		],
+		[
+			:name = "ringsqlite",
+			:version = "1.0",
+			:providerusername = ""
+		],
+		[
+			:name = "ringmysql",
+			:version = "1.0",
+			:providerusername = ""
+		],
+		[
+			:name = "ringpostgresql",
+			:version = "1.0",
 			:providerusername = ""
 		]
 	],
