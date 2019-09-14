@@ -1,7 +1,7 @@
 # The Ring Standard Library
 # Common Functions and classes for applications
-# 2016-2017, Mahmoud Fayed <msfclipper@yahoo.com>
-# 2016-2017, CalmoSoft <calmosoft@gmail.com>
+# 2016-2019, Mahmoud Fayed <msfclipper@yahoo.com>
+# 2016-2019, CalmoSoft <calmosoft@gmail.com>
 
 Load "stdlib.rh"
 Load "stdfunctions.ring"
@@ -538,6 +538,9 @@ Func Palindrome aString
      next
      if aString = bString return 1 ok
      return false
+
+Func IsPalindrome aString
+     return Palindrome(aString)
      
 /*
 	Function Name	: Isleapyear
@@ -1061,29 +1064,48 @@ func List2Code aList
 	Convert string to a List of numbers 
 	Where each number is the ASCII code of a character 
 */
-	func Str2ASCIIList cStr 
-		if not isString(cStr)
-			raise("Type Error in Str2ASCIIList() function")
-		ok
-		aList = []
-		for cChar in cStr 
-			aList + ASCII(cChar)
-		next 
-		return aList 
+func Str2ASCIIList cStr 
+	if not isString(cStr)
+		raise("Type Error in Str2ASCIIList() function")
+	ok
+	aList = []
+	for cChar in cStr 
+		aList + ASCII(cChar)
+	next 
+	return aList 
 
 /*
 	Convert List of numbers where each number is the ASCII code of character 
 	To String 
 */
-	func ASCIIList2Str aList 
-		if not isList(aList)
-			raise("Type Error in ASCIIList2Str() function")
+func ASCIIList2Str aList 
+	if not isList(aList)
+		raise("Type Error in ASCIIList2Str() function")
+	ok
+	cStr = ""
+	for nNum in aList 
+		if not isNumber(nNum)
+			raise("Type Error in ASCIIList2Str() function - Item is not a number!")
 		ok
-		cStr = ""
-		for nNum in aList 
-			if not isNumber(nNum)
-				raise("Type Error in ASCIIList2Str() function - Item is not a number!")
-			ok
-			cStr += char(nNum)
-		next 
-		return cStr 
+		cStr += char(nNum)
+	next 
+	return cStr 
+
+/*
+	Get Item from time information list
+*/
+func timeInfo( item )
+        return timelist()[ aTimeInfoMap[item] ]
+
+
+/*
+	Check that the number is between two numbers 
+*/
+
+func IsBetween x, min, max return (x >= min) AND (x <= max)
+
+/*
+	Check that a List contains a group of items in another list
+*/
+func IsListContainsItems aParent,aChild
+     for item in aChild if not find(aParent,item) return false ok next return True
