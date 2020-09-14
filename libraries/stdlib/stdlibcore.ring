@@ -279,23 +279,6 @@ Func SplitMany cString,cCharacters
 	next 
 	return str2list(cString)
 
-
-/*
-	Function Name	: newlist
-	Usage		: create a two dimensional list
-	Parameters	: number of dimensions
-	output		: two dimensional list 
-*/
-
-Func NewList x, y
-     if isstring(x) x=0+x ok
-     if isstring(y) y=0+y ok
-     alist = list(x)
-     for t in alist
-         t = list(y)
-     next
-     return alist	
-
 /*
 	Function Name	: capitalized
 	Usage		: return a copy with the first letter capitalized
@@ -723,16 +706,7 @@ Func Readline fp
 	output		: True/False 
 */      
 Func IsMainSourceFile
-	if len(sysargv) >= 2
-		if PrevFileName() = substr(sysargv[2],"ringo","ring")
-			return true
-		ok
-	else    # We are using Ring2EXE and we have executable code 
-		if Prevfilename() = substr(ringvm_fileslist()[1],"ringo","ring")
-			return true 
-		ok
-	ok
-	return false
+	return Prevfilename() = ringvm_fileslist()[1]
 
 /*
 	Function Name	: Substring
@@ -913,12 +887,12 @@ return cStr
 			 (2) if the extension is empty, all files will be included
 
 	Examples
-			aList = ListAllFiles("b:/ring/ringlibs","ring") # *.ring only
+			aList = ListAllFiles("b:/ring/libraries","ring") # *.ring only
 			aList = sort(aList)
 			see aList
 	Example 
 			load "stdlib.ring"
-			see listallfiles("b:/ring/ringlibs/weblib","") # All Files
+			see listallfiles("b:/ring/libraries/weblib","") # All Files
 */
 
 func ListAllFiles cPath,cExt
@@ -932,11 +906,13 @@ func ListAllFiles_Process cPath,aList,cExt
 	aOutput = []
 	for aSub in aList 
 		# Workaround a bug in Linux, when aSub[2] = True for files (not folders)
-			if aSub[1] = "." or aSub[1] = ".."
-				loop
-			ok
-			if aSub[2] and substr(aSub[1],".")
-				aSub[2] = 0
+			if ! isWindows()
+				if aSub[1] = "." or aSub[1] = ".."
+					loop
+				ok
+				if aSub[2] and substr(aSub[1],".")
+					aSub[2] = 0
+				ok
 			ok
 		if aSub[2] # Directory
 			cNewPath = cPath + "/" + aSub[1]
