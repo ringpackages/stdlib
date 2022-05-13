@@ -8,125 +8,6 @@ Load "stdlib.rh"
 Load "stdfunctions.ring"
 
 /*
-	Function Name	: puts
-	Usage		: print the value then print new line (nl)
-	Parameters	: the value
-*/
-Func Puts vvalue
-	see vvalue
-	see nl
-
-/*
-	Function Name	: print
-	Usage		: print string - support \n \t \r \\ #{variable}
-	Parameters	: the string
-*/
-Func Print vValue
-	if isstring(vValue)
-		see _Print2Str(vValue,3)
-	else
-		see vValue 
-	ok
-
-/*
-	Function Name	: print2str
-	Usage		: print to string - support \n \t \r \\ #{variable}
-	Parameters	: the string
-*/
-Func Print2Str vValue
-	# Pass Three Scopes 
-	if isnumber(vValue)
-		vValue = "" + vValue 
-	ok
-	if isstring(vValue)
-		return _Print2Str(vValue,3)
-	else 
-		raise("Type Error : Print2Str() Accept Strings/Numbers Only!")
-	ok
-
-/*
-	Function Name	: _print2str
-	Usage		: Internal function - print to string 
-	Parameters	: the string , Scopes to pass 
-*/
-Func _Print2Str vValue,nScope
-	cString = ""
-	for t = 1 to len(vValue)
-		switch vValue[t]
-		on "\"
-			t++
-			switch vValue[t]
-			on "\"
-				cString +=  "\"
-			on "n"
-				cString +=  nl
-			on "t"
-				cString +=  char(9)
-			on "r" 
-				cString +=  char(13)
-			off
-		on "#"
-			if vValue[t+1] = "{"
-				cVar = ""
-				for r=t+2 to len(vValue)
-					if vValue[r] != "}"
-						cVar += vValue[r]
-					else
-						exit
-					ok					
-				next
-				# Access Local Variables in the Caller
-				if not find(globals(),lower(cVar))
-					aMem = ringvm_memorylist()
-					if len(aMem) > 1
-						# -2 to avoid two scopes 
-						# scope used by ringvm_memorylist() 
-						# scope used by _print2str() 
-						aList = aMem[len(aMem)-nScope]
-						nPos = find(aList,lower(cVar),1)
-						if nPos 
-							cVar = "aList[nPos][3]"
-						ok
-					ok
-				else 
-					aMem = ringvm_memorylist()
-					aList = aMem[1]
-					nPos = find(aList,lower(cVar),1)
-					if nPos 
-						cVar = "aList[nPos][3]"
-					ok
-				ok
-				cCode = "cString += " + cVar				
-				eval(cCode)
-				t = r
-			ok
-		other
-			cString +=  vValue[t]
-		off
-	next
-	return cString
-
-
-/*
-	Function Name	: getstring
-	Usage		: get input using the keyboard
-	Parameters	: no Parameters
-*/
-Func GetString
-	Give _temp_get_string
-	return _temp_get_string
-
-
-/*
-	Function Name	: getnumber
-	Usage		: get input using the keyboard - return number
-	Parameters	: no Parameters
-*/
-Func GetNumber
-	Give _temp_get_number
-	return 0 + _temp_get_number
-
-/*
 	Function Name	: isappcompiled
 	Usage		: check whether the application has been compiled using Ring2EXE
 	Parameters	: no Parameters
@@ -1180,3 +1061,38 @@ func RandomItem aList
 	if ! isList(aList) raise(C_ERROR_EXPECTLIST) return ok
 	if len(aList) <= 0  raise(C_ERROR_EMPTYLIST) return ok
 	return aList[ random( len(aList) - 1 ) + 1 ]
+
+/*
+	Check if two items are equal.
+	Deep comparison is performed if the two items are lists
+	Return 1 if both items are equal and 0 otherwise
+*/
+func CheckEquality aItem1, aItem2
+	if islist(aItem1) and islist(aItem2)
+		/* both items are list. perform deep comparison */
+		if Len(aItem1) = Len(aItem2)
+			aItem1Len = Len(aItem1)
+			/* same length for both lists so we call CheckEquality on each item pair */
+			for aItemIndex=1 to aItem1Len
+				if not CheckEquality(aItem1[aItemIndex],aItem2[aItemIndex])
+					return false
+				ok
+			next
+			/* all lists elements are equal, return 1 */
+			return true
+		else
+			/* the two lists have different lengths */
+			return false
+		ok
+	but isnull(aItem1) and isnull(aItem2)
+		return true
+	but (isstring(aItem1) and isstring(aItem2)) or (isnumber(aItem1) and isnumber(aItem2)) or (ispointer(aItem1) and ispointer(aItem2))
+		/* if both items are strings or numbers or pointers, use = operator */
+		if aItem1 = aItem2
+			return true
+		else
+			return false
+		ok
+	else
+		return false
+	ok
