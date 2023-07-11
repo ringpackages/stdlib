@@ -3,6 +3,7 @@
 # 2016-2019, Mahmoud Fayed <msfclipper@yahoo.com>
 # 2016-2019, CalmoSoft <calmosoft@gmail.com>
 # 2020, Bert Mariani (Matrix Multiplication)
+# 2023, Dan Campbell (Reduce function)
 
 Load "stdlib.rh"
 Load "stdfunctions.ring"
@@ -113,6 +114,10 @@ func JustFileName cFile
 	Output		: the new copy of the list or the object
 */
 Func Value vlistorobj
+	if refcount(vlistorobj) > 1
+		raise("The Value() function doesn't support references")
+		return
+	ok
 	vlistorobj2 = vlistorobj
 	return vlistorobj2
 
@@ -155,6 +160,58 @@ Func Filter alist,cFunc
 	next
 	return alist2
 
+/*
+	Function Name	: reduce
+	Usage		: apply function cFunc to each result xResult from a list aList, return an accumulated value xResult
+	Parameters	: the list aList, Function cFunc, and optional initial value xInitial as variant
+	Output		: final value after applying the function iteratively to each result
+	Note		: the input list aList, the optional intial value xInitial and the output xResult, need to be the same Type
+*/
+Func Reduce aList,cFunc,xInitial
+	nNthElement = 0
+	xNthElement = NULL
+	nStart = 1
+	nLength = 0
+	sNthElementType = NULL
+	sElementType = NULL
+
+	If Not IsList( aList )
+		Raise( "aList should be a list.  Instead, it's a " + Type( aList ) )
+	Ok
+	nLength = Len(aList)
+
+	If Not IsFunction(cFunc)
+		Raise( cFunc + " is not a function." )
+	Ok
+
+	if IsNULL(xInitial)
+		// If the list is non-empty, then default xInitial to its first element
+		if nLength>0
+			xInitial = aList[1]
+			nStart = 2
+			sElementType = Type( xInitial )
+		else
+			raise("if xInitial is NULL, then Reduce() requires a non-empty list aList")
+		Ok
+	Else
+		// If the List doesn't have at least one member, then return xInitial
+		if nLength < 1
+			xResult = xInitial
+			return xResult
+		Ok
+	Ok
+	sElementType = Type( xInitial )
+	xResult = xInitial
+	// Loop through all of aList, and return an accumulated value after successfully applying cFunc to each result.
+	for nElement = nStart to nLength
+		xNthElement = aList[nElement]
+		sNthElementType = Type(xNthElement)
+		If Not sNthElementType = sElementType
+			Raise( "At least one of the elements in aList is " + sNthElementType + ".  It should be " + sElementType )
+		Ok
+		xResult = call cFunc(xResult,xNthElement)
+	next
+	return xResult
 
 /*
 	Function Name	: split
@@ -515,11 +572,11 @@ Func Matrixmulti A, B
 			Sum = 0
 			for k = 1 to horzA             
 				Sum += A[vA][k] * B[k][hB]    
-				if FlagShowSolution = 1                  // 0 No Show, 1 = Show Solution
+				if C_FLAGSHOWSOLUTION = 1                  // 0 No Show, 1 = Show Solution
 					See " "+ A[vA][k] +"*"+ B[k][hB]
 				ok
 			next
-			if FlagShowSolution = 1 
+			if C_FLAGSHOWSOLUTION = 1 
 				See " = "+ Sum  +"  C"+ vA + hB +nl
 			ok
 			C[va][hB] = Sum          
