@@ -236,21 +236,24 @@ Func Split(cString, delimiter)
 	singleSpace = " "
 	singleTab   = char(9)
 	
-	if ( (delimiter = singleTab) or (delimiter = singleSpace) )
+	if delimiter = singleTab
 		delimiter = singleSpace
 	ok
 
 	if ( delimiter = singleSpace )
+		# Replace Tab with Space
 		do
-			cString = substr(cstring, singleTab, singleSpace)   ### Replace Tab with Space
+			cString = substr(cstring, singleTab, singleSpace)   
 		again substr(cString, singleTab)
 
+		# Replace DoubleSpace with Space
 		do
-			cString = substr(cString, doubleSpace, singleSpace) ### Replace DoubleSpace with Space
+			cString = substr(cString, doubleSpace, singleSpace) 
 		again substr(cString, doubleSpace)
 	ok
 	
-	cString = trim(cString) ### Remove leading and trailing spaces
+	# Remove leading and trailing spaces
+	cString  = trim(cString) 
 	cStrList = str2list(substr(cString, delimiter, nl))
 
 	return cStrList
@@ -330,7 +333,7 @@ Func LineCount text
 	Output		: factorial of a number.
 */
 
-Func Factorial n if n = 0 return 1 else return n * factorial(n-1) ok
+Func Factorial n  if n = 0 return 1 ok nRes = 1 for t=1 to n nRes *= t next return nRes
 
 /*
 	Function Name	: fibonacci
@@ -342,7 +345,13 @@ Func Factorial n if n = 0 return 1 else return n * factorial(n-1) ok
 Func Fibonacci n
 	if n = 0 return 0 ok
 	if n = 1 return 1 ok 
-	if n > 1 return fibonacci(n-1) + fibonacci(n-2) ok
+	aFibRes = [ ["0", 0], ["1", 1] ]
+	if n > 1
+		for t=2 to n
+			aFibRes[""+t] = aFibRes[""+(t-1)] + aFibRes[""+(t-2)]
+		next 
+		return aFibRes[""+n]
+	ok
     
 /*
 	Function Name	: isprime
@@ -952,7 +961,7 @@ func OSCopyFolder cParentFolder,cFolder
 	if isWindows()
 		systemsilent("xcopy /e /y /j " + cCompleteFolderPath)
 	else 
-		systemsilent("cp -R " + cCompleteFolderPath + " ./")
+		systemsilent("cp -R " + cCompleteFolderPath + " ../")
 	ok
 	chdir(cCurrentFolder)
 
@@ -971,12 +980,12 @@ func OSDeleteFolder cFolder
 	Copy File to the current directory
 */
 func OSCopyFile cFile
-	if len(cFile) >= 1
-		if cFile[1] != '"'
-			cFile = '"' + cFile + '"'
-		ok
-	ok
 	if isWindows()
+		if len(cFile) >= 1
+			if cFile[1] != '"'
+				cFile = '"' + cFile + '"'
+			ok
+		ok
 		cFile = substr(cFile,"/","\")
 		systemSilent("copy " + cFile)
 	else 
